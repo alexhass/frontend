@@ -13,6 +13,10 @@ import "../../../../components/ha-icon";
 import "../../../../components/ha-label";
 import { labelsContext } from "../../../../data/context";
 import type { DeviceRegistryEntry } from "../../../../data/device/device_registry";
+import {
+  computeDeviceManufacturer,
+  computeDeviceModel,
+} from "../../../../data/device/device_translation";
 import type { LabelRegistryEntry } from "../../../../data/label/label_registry";
 import { haStyle } from "../../../../resources/styles";
 import type { HomeAssistant } from "../../../../types";
@@ -22,6 +26,9 @@ export class HaDeviceCard extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public device!: DeviceRegistryEntry;
+
+  // The integration whose translations name the model and manufacturer
+  @property({ attribute: false }) public domain?: string;
 
   @property({ type: Boolean }) public narrow = false;
 
@@ -58,6 +65,16 @@ export class HaDeviceCard extends LitElement {
       this.device.labels,
       this.hass.locale.language
     );
+    const model = computeDeviceModel(
+      this.hass.localize,
+      this.device,
+      this.domain
+    );
+    const manufacturer = computeDeviceManufacturer(
+      this.hass.localize,
+      this.device,
+      this.domain
+    );
 
     return html`
       <ha-card
@@ -68,9 +85,9 @@ export class HaDeviceCard extends LitElement {
       >
         <div class="card-content">
           ${
-            this.device.model
+            model
               ? html`<div class="model">
-                  ${this.device.model}
+                  ${model}
                   ${this.device.model_id ? html`(${this.device.model_id})` : ""}
                 </div>`
               : this.device.model_id
@@ -78,12 +95,12 @@ export class HaDeviceCard extends LitElement {
                 : ""
           }
           ${
-            this.device.manufacturer
+            manufacturer
               ? html`
                   <div class="manuf">
                     ${this.hass.localize(
                       "ui.panel.config.integrations.config_entry.manuf",
-                      { manufacturer: this.device.manufacturer }
+                      { manufacturer }
                     )}
                   </div>
                 `

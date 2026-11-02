@@ -60,6 +60,7 @@ declare global {
 export type TranslationCategory =
   | "title"
   | "state"
+  | "device"
   | "entity"
   | "entity_component"
   | "exceptions"

@@ -34,6 +34,10 @@ export interface DeviceRegistryEntry extends RegistryEntry {
   sw_version: string | null;
   hw_version: string | null;
   serial_number: string | null;
+  // The translation key and placeholders the integration registered the device
+  // with, to translate its model and manufacturer
+  translation_key?: string | null;
+  translation_placeholders?: Record<string, string> | null;
   via_device_id: string | null;
   area_id: string | null;
   name_by_user: string | null;

@@ -714,7 +714,11 @@ export class HaConfigDevicePage extends LitElement {
             `
           : ""
       }
-      <ha-device-info-card .hass=${this.hass} .device=${device}>
+      <ha-device-info-card
+        .hass=${this.hass}
+        .device=${device}
+        .domain=${integrations[0]?.domain}
+      >
         ${deviceInfo}
         ${
           firstDeviceAction || actions.length
@@ -1044,6 +1048,16 @@ export class HaConfigDevicePage extends LitElement {
 
   private _fetchData() {
     if (this.deviceId && this.entries.length) {
+      const device = this.hass.devices[this.deviceId];
+      if (device) {
+        // For the translated model and manufacturer of the device
+        this.hass.loadBackendTranslation(
+          "device",
+          this._integrations(device, this.entries, this.manifests).map(
+            (entry) => entry.domain
+          )
+        );
+      }
       this._getDiagnosticButtons();
       this._getDeleteActions();
       clearTimeout(this._deviceAlertsActionsTimeout);

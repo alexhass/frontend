@@ -60,6 +60,10 @@ import "../../../components/ha-filter-states";
 import "../../../components/ha-icon-button";
 import { createAreaRegistryEntry } from "../../../data/area/area_registry";
 import type { ConfigEntry, SubEntry } from "../../../data/config_entries";
+import {
+  computeDeviceManufacturer,
+  computeDeviceModel,
+} from "../../../data/device/device_translation";
 import { getSubEntries, sortConfigEntries } from "../../../data/config_entries";
 import { fullEntitiesContext, labelsContext } from "../../../data/context";
 import type { DataTableFilters } from "../../../data/data_table_filters";
@@ -212,6 +216,12 @@ export class HaConfigDeviceDashboard extends LitElement {
     if (!this.hasUpdated) {
       this._filters = this._storageFilters;
       this._applyLink();
+    }
+    if (changedProps.has("entries") && this.entries) {
+      // For the translated models and manufacturers of the devices
+      this.hass.loadBackendTranslation("device", [
+        ...new Set(this.entries.map((entry) => entry.domain)),
+      ]);
     }
     if (changedProps.has("_selected") || changedProps.has("entries")) {
       this._selectedCanDelete = this._selected.filter((d) => {
@@ -485,11 +495,14 @@ export class HaConfigDeviceDashboard extends LitElement {
           ...device,
           name: computeDeviceNameDisplay(device, this.hass.localize),
           model:
-            device.model ||
+            computeDeviceModel(localize, device, deviceEntries[0]?.domain) ||
             `<${localize("ui.panel.config.devices.data_table.unknown")}>`,
           manufacturer:
-            device.manufacturer ||
-            `<${localize("ui.panel.config.devices.data_table.unknown")}>`,
+            computeDeviceManufacturer(
+              localize,
+              device,
+              deviceEntries[0]?.domain
+            ) || `<${localize("ui.panel.config.devices.data_table.unknown")}>`,
           area: areaName,
           floor: floorName,
           integration: !entries
